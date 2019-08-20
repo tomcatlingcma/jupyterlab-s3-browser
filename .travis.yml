@@ -15,6 +15,8 @@ script:
 deploy:
   - provider: script
     script: npm pack --dry-run
+    on:
+      branch: debug-travis-publishing
   - provider: npm
     email: reevejamesd@gmail.com
     api_key:
