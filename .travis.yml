@@ -8,10 +8,13 @@ cache:
 install:
 - yarn install
 - yarn run build
+- npm pack --dry-run
 - pip install .
 script:
 - echo "no tests implemented"
 deploy:
+  - provider: script
+    script: npm pack --dry-run
   - provider: npm
     email: reevejamesd@gmail.com
     api_key:
