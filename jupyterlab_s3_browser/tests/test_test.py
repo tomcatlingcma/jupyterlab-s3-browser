@@ -17,7 +17,3 @@ def test_not_has_aws_s3_role_access_when_unauthenticated():
 def test_has_aws_s3_role_access_when_authenticated():
     if not jupyterlab_s3_browser.has_aws_s3_role_access():
         pytest.fail("not authenticated")
-
-
-def test_fail():
-    pytest.fail("fail")

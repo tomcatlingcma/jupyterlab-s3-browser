@@ -13,7 +13,7 @@ install:
   - pip install -r requirements.travis.txt
 script:
   - coverage run -m pytest jupyterlab_s3_browser
-  - coverage report --fail-under 20
+  - coverage report --fail-under 80
 deploy:
   - provider: npm
     email: reevejamesd@gmail.com
