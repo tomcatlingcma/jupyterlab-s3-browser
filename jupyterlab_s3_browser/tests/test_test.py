@@ -3,9 +3,9 @@ import jupyterlab_s3_browser
 from moto import mock_s3
 
 
-class TestTest(object):
-    def test_succeed(self):
-        assert True
+#  class TestTest(object):
+#  def test_succeed(self):
+#  assert True
 
 
 def test_not_has_aws_s3_role_access_when_unauthenticated():
@@ -19,5 +19,5 @@ def test_has_aws_s3_role_access_when_authenticated():
         pytest.fail("not authenticated")
 
 
-def fail():
+def test_fail():
     pytest.fail("fail")
