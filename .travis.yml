@@ -10,7 +10,8 @@ install:
 - yarn run build
 - pip install .
 script:
-- echo "no tests implemented"
+- pytest jupyterlab_s3_browser
+- coverage report --fail-under 20
 deploy:
   - provider: npm
     email: reevejamesd@gmail.com

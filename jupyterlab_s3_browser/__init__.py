@@ -7,6 +7,7 @@ import re
 from collections import namedtuple
 
 import boto3
+from botocore.exceptions import NoCredentialsError
 import tornado.gen as gen
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
@@ -45,7 +46,7 @@ class S3Resource:  # pylint: disable=too-few-public-methods
             self.s3_resource = boto3.resource("s3")
 
 
-def test_aws_s3_role_access():
+def _test_aws_s3_role_access():
     """
   Checks if we have access to AWS S3 through role-based access
   """
@@ -55,7 +56,18 @@ def test_aws_s3_role_access():
         {"name": bucket.name + "/", "path": bucket.name + "/", "type": "directory"}
         for bucket in all_buckets
     ]
-    assert result
+    return result
+
+
+def has_aws_s3_role_access():
+    """
+    Returns true if the user has access to an S3 bucket
+    """
+    try:
+        _test_aws_s3_role_access()
+        return True
+    except NoCredentialsError:
+        return False
 
 
 def test_s3_credentials(endpoint_url, client_id, client_secret):
@@ -90,7 +102,7 @@ class AuthHandler(APIHandler):  # pylint: disable=abstract-method
         """
         authenticated = False
         try:
-            test_aws_s3_role_access()
+            _test_aws_s3_role_access()
             # if no exceptions, assume authenticated
             authenticated = True
         except Exception as err:
