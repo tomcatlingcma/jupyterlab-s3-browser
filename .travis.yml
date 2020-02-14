@@ -9,6 +9,7 @@ install:
 - yarn install
 - yarn run build
 - pip install .
+- pip install -r requirements.travis.txt
 script:
 - pytest jupyterlab_s3_browser
 - coverage report --fail-under 20
