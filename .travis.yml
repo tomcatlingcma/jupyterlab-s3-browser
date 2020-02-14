@@ -1,18 +1,19 @@
+---
 language: python
 python: '3.6'
 cache:
   yarn: true
   pip: true
   directories:
-  - node_modules
+    - node_modules
 install:
-- yarn install
-- yarn run build
-- pip install .
-- pip install -r requirements.travis.txt
+  - yarn install
+  - yarn run build
+  - pip install .
+  - pip install -r requirements.travis.txt
 script:
-- pytest jupyterlab_s3_browser
-- coverage report --fail-under 20
+  - pytest jupyterlab_s3_browser
+  - coverage report --fail-under 20
 deploy:
   - provider: npm
     email: reevejamesd@gmail.com
