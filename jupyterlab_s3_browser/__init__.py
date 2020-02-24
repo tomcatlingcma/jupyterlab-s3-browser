@@ -178,35 +178,49 @@ class S3Handler(APIHandler):
             else:
                 bucket_name, path = self.parse_bucket_name_and_path(path)
                 bucket = self.s3.Bucket(bucket_name)
-                objects = bucket.objects.filter(Prefix=path, Delimiter='/')
-
+                
+                # trim the leading slash after this point
+                path = path[1:] if path[0] == '/' else path
+                
+                # resource is buggy with delimeters, use the client instead
+                response = bucket.meta.client.list_objects_v2(Bucket = bucket_name, Prefix=path, Delimiter='/')
+                
                 result = []
-                for obj in objects:
-                    if obj.key == path:
-                        result = {
-                            "path": "{}/{}".format(bucket_name, path),
-                            "type": "file",
-                            "mimetype": obj.content_type,
-                            "content": base64.encodebytes(obj.get()["Body"].read()).decode(
-                                "ascii"
-                            ),
-                        }
-                        break
-                    else:
+                single_item = False
+                
+                if response.get('Contents'):
+                    for obj in response['Contents']:
+                        # deal with the case of a single object requested directly
+                        if obj['Key'] == path:
+                            result = {
+                                "path": "{}/{}".format(bucket_name, path),
+                                "type": "file",
+                                "mimetype": obj.content_type,
+                                "content": base64.encodebytes(
+                                    s3.Object(bucket_name, obj['Key']).get()["Body"].read()
+                                ).decode("ascii"),
+                            }
+                            single_item = True
+                            break
+                        else:
+                            result.append(
+                                {
+                                    "name": obj['Key'].split('/')[-1],
+                                    "path": "{}/{}".format(bucket_name, obj['Key']),
+                                    "type": "file",
+                                    "mimetype": s3.Object(bucket_name, obj['Key']).content_type,
+                                }
+                            )
+                            
+                if response.get('CommonPrefixes') and not single_item:
+                    for obj in response['CommonPrefixes']:
                         result.append(
                             {
-                                    "name": obj.key.split('/')[-2]+'/',
-                                    "path": "{}/{}".format(bucket_name, obj.key),
+                                    "name": obj['Key'].split('/')[-2]+'/',
+                                    "path": "{}/{}".format(bucket_name, obj['Key']),
                                     "type": "directory",
                                     "mimetype": "json",
                             } 
-                            if obj.key[-1]=='/' else 
-                            {
-                                    "name": obj.key.split('/')[-1],
-                                    "path": "{}/{}".format(bucket_name, obj.key),
-                                    "type": "file",
-                                    "mimetype": obj.Object().content_type,
-                            }
                         )
                 
                 if not result:
