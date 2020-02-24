@@ -178,7 +178,7 @@ class S3Handler(APIHandler):
             else:
                 bucket_name, path = self.parse_bucket_name_and_path(path)
                 bucket = self.s3.Bucket(bucket_name)
-                objects = list(bucket.objects.filter(Prefix=path))
+                objects = list(bucket.objects.filter(Prefix=path, Delimiter='/'))
                 num_matches = len(objects)
 
                 if num_matches == 1 and objects[0].key == path:
@@ -199,7 +199,7 @@ class S3Handler(APIHandler):
                         # need to add / to the prefix if not at the "root" of a bucket
                         path = path + "/"
 
-                    all_objects = [obj for obj in bucket.objects.filter(Prefix=path)]
+                    all_objects = [obj for obj in bucket.objects.filter(Prefix=path, Delimiter='/')]
                     result = set()
                     Content = namedtuple(
                         "Content", ["name", "path", "type", "mimetype"]
