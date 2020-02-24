@@ -209,7 +209,7 @@ class S3Handler(APIHandler):
                             }
                         )
                 
-                if len result < 1:
+                if not result:
                     result = {
                         "error": 404,
                         "message": "The requested resource could not be found.",
