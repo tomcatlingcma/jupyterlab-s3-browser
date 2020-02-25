@@ -150,11 +150,7 @@ class S3Handler(APIHandler):
     s3 = None  # an S3Resource instance to be used for requests
 
     def parse_bucket_name_and_path(self, raw_path):
-        if "/" not in raw_path:
-            bucket_name = raw_path
-            path = ""
-        else:
-            bucket_name, path = raw_path.split("/", 1)
+        _, bucket_name, path = raw_path.split('/',2)
         return (bucket_name, path)
 
     @gen.coroutine
@@ -172,7 +168,7 @@ class S3Handler(APIHandler):
                 # requesting the root path, just return all buckets
                 all_buckets = self.s3.buckets.all()
                 result = [
-                    {"name": bucket.name, "path": bucket.name + '/', "type": "directory"}
+                    {"name": bucket.name, "path": f"{bucket.name}/", "type": "directory"}
                     for bucket in all_buckets
                 ]
             else:
@@ -190,7 +186,7 @@ class S3Handler(APIHandler):
                         # deal with the case of a single object requested directly
                         if obj['Key'] == path:
                             result = {
-                                "path": "{}/{}".format(bucket_name, path),
+                                "path": "{bucket_name}/{path}",
                                 "type": "file",
                                 "mimetype": obj.content_type,
                                 "content": base64.encodebytes(
@@ -203,7 +199,7 @@ class S3Handler(APIHandler):
                             result.append(
                                 {
                                     "name": obj['Key'].split('/')[-1],
-                                    "path": "{}/{}".format(bucket_name, obj['Key']),
+                                    "path": f"{bucket_name}/{obj['Key']}",
                                     "type": "file",
                                     "mimetype": s3.Object(bucket_name, obj['Key']).content_type,
                                 }
@@ -214,7 +210,7 @@ class S3Handler(APIHandler):
                         result.append(
                             {
                                 "name": obj['Prefix'].split('/')[-2]+'/',
-                                "path": "{}/{}".format(bucket_name, obj['Prefix']),
+                                "path": f"{bucket_name}/{obj['Prefix']}",
                                 "type": "directory",
                                 "mimetype": "json",
                             } 
@@ -229,7 +225,7 @@ class S3Handler(APIHandler):
             print(e)
             result = {
                 "error": 500, 
-                "message": f"Path: {str(e)} Error: {raw_path}"
+                "message": f"Path: {raw_path} Error: {str(e)}"
             }
 
         self.finish(json.dumps(result))
