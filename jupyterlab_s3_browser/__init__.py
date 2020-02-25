@@ -223,11 +223,14 @@ class S3Handler(APIHandler):
                 if not result:
                     result = {
                         "error": 404,
-                        "message": "The requested resource could not be found.",
+                        "message": f"{raw_path} could not be found.",
                     }
         except Exception as e:
             print(e)
-            result = {"error": 500, "message": f"Path: {str(e)} Error: {raw_path}"}
+            result = {
+                "error": 500, 
+                "message": f"Path: {str(e)} Error: {raw_path}"
+            }
 
         self.finish(json.dumps(result))
 
