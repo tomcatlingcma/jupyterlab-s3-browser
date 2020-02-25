@@ -150,9 +150,12 @@ class S3Handler(APIHandler):
     s3 = None  # an S3Resource instance to be used for requests
 
     def parse_bucket_name_and_path(self, raw_path):
-        _, bucket_name, path = raw_path.split('/',2)
-        return (bucket_name, path)
-
+        parts = raw_path.split('/', 2)
+        if len(parts)>2:
+            return (parts[1], parts[2])
+        else:
+            return (parts[1], '')
+        
     @gen.coroutine
     def get(self, raw_path="/"):
         """
