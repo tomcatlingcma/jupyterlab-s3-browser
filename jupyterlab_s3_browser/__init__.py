@@ -150,15 +150,15 @@ class S3Handler(APIHandler):
     s3 = None  # an S3Resource instance to be used for requests
 
     def parse_bucket_name_and_path(self, raw_path):
-        if "/" not in raw_path[1:]:
-            bucket_name = raw_path[1:]
+        if "/" not in raw_path:
+            bucket_name = raw_path
             path = ""
         else:
-            bucket_name, path = raw_path[1:].split("/", 1)
+            bucket_name, path = raw_path.split("/", 1)
         return (bucket_name, path)
 
     @gen.coroutine
-    def get(self, path=""):
+    def get(self, raw_path="/"):
         """
         Takes a path and returns lists of files/objects
         and directories/prefixes based on the path.
@@ -172,15 +172,12 @@ class S3Handler(APIHandler):
                 # requesting the root path, just return all buckets
                 all_buckets = self.s3.buckets.all()
                 result = [
-                    {"name": bucket.name, "path": bucket.name, "type": "directory"}
+                    {"name": bucket.name, "path": bucket.name + '/', "type": "directory"}
                     for bucket in all_buckets
                 ]
             else:
-                bucket_name, path = self.parse_bucket_name_and_path(path)
+                bucket_name, path = self.parse_bucket_name_and_path(raw_path)
                 bucket = self.s3.Bucket(bucket_name)
-                
-                # trim the leading slash after this point
-                path = path[1:] if len(path)>0 and path[0] == '/' else path
                 
                 # resource is buggy with delimeters, use the client instead
                 response = bucket.meta.client.list_objects_v2(Bucket = bucket_name, Prefix=path, Delimiter='/')
