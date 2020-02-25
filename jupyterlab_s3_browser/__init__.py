@@ -168,7 +168,7 @@ class S3Handler(APIHandler):
             if not self.s3:
                 self.s3 = S3Resource(self.config).s3_resource
 
-            if path == "/":
+            if raw_path == "/":
                 # requesting the root path, just return all buckets
                 all_buckets = self.s3.buckets.all()
                 result = [
@@ -227,7 +227,7 @@ class S3Handler(APIHandler):
                     }
         except Exception as e:
             print(e)
-            result = {"error": 500, "message": str(e)}
+            result = {"error": 500, "message": f"Path: {str(e)} Error: {raw_path}"}
 
         self.finish(json.dumps(result))
 
