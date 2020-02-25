@@ -180,7 +180,7 @@ class S3Handler(APIHandler):
                 bucket = self.s3.Bucket(bucket_name)
                 
                 # trim the leading slash after this point
-                path = path[1:] if path[0] == '/' else path
+                path = path[1:] if len(path)>0 and path[0] == '/' else path
                 
                 # resource is buggy with delimeters, use the client instead
                 response = bucket.meta.client.list_objects_v2(Bucket = bucket_name, Prefix=path, Delimiter='/')
@@ -216,10 +216,10 @@ class S3Handler(APIHandler):
                     for obj in response['CommonPrefixes']:
                         result.append(
                             {
-                                    "name": obj['Key'].split('/')[-2]+'/',
-                                    "path": "{}/{}".format(bucket_name, obj['Key']),
-                                    "type": "directory",
-                                    "mimetype": "json",
+                                "name": obj['Prefix'].split('/')[-2]+'/',
+                                "path": "{}/{}".format(bucket_name, obj['Prefix']),
+                                "type": "directory",
+                                "mimetype": "json",
                             } 
                         )
                 
